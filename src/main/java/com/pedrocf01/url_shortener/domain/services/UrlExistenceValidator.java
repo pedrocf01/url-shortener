@@ -12,7 +12,7 @@ public class UrlExistenceValidator {
 
     public static boolean isUrlExists(String urlString) {
         try {
-            log.debug("Checking if URL exists: {}", urlString);
+            log.info("Checking if URL exists: {}", urlString);
             URL url = new URI(urlString).toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 

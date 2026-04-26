@@ -2,6 +2,7 @@ package com.pedrocf01.url_shortener.domain.services;
 
 import com.pedrocf01.url_shortener.ApplicationProperties;
 import com.pedrocf01.url_shortener.domain.entities.ShortUrl;
+import com.pedrocf01.url_shortener.domain.exceptions.ShortUrlNotFoundException;
 import com.pedrocf01.url_shortener.domain.models.CreateShortUrlCmd;
 import com.pedrocf01.url_shortener.domain.models.ShortUrlDto;
 import com.pedrocf01.url_shortener.domain.repositories.ShortUrlRepository;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -73,4 +75,16 @@ public class ShortUrlService {
         return sb.toString();
     }
 
+    public Optional<ShortUrlDto> accessShortUrl(String shortKey) {
+        Optional<ShortUrl> shortUrlOptional = shortUrlRepository.findByShortKey(shortKey);
+
+        if(shortUrlOptional.isEmpty())
+            return Optional.empty();
+
+        ShortUrl shortUrl = shortUrlOptional.get();
+        if(shortUrl.getExpiresAt() != null && shortUrl.getExpiresAt().isBefore(Instant.now()))
+            return Optional.empty();
+
+        return shortUrlOptional.map(entityMapper::toShortUrlDto);
+    }
 }
