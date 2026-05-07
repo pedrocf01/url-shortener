@@ -30,11 +30,16 @@ public class HomeController {
         this.securityUtils = securityUtils;
     }
 
-    @GetMapping("/")
-    public String home(@RequestParam(defaultValue = "1") Integer page , Model model) {
-        PagedResult<ShortUrlDto> shortUrls = shortUrlService.findAllPublicShortUrls(page, properties.pageSize());
+    private void addShortUrlsDataToModel(Model model, int pageNum) {
+        PagedResult<ShortUrlDto> shortUrls = shortUrlService.findAllPublicShortUrls(pageNum, properties.pageSize());
         model.addAttribute("shortUrls", shortUrls);
         model.addAttribute("baseUrl", properties.baseUrl());
+    }
+
+    @GetMapping("/")
+    public String home(@RequestParam(defaultValue = "1") Integer page , Model model) {
+        this.addShortUrlsDataToModel(model, page);
+        model.addAttribute("paginationUrl", "/");
         model.addAttribute("createShortUrlForm",
                                 new CreateShortUrlForm("", false, null));
         return "index";
@@ -46,9 +51,7 @@ public class HomeController {
                           RedirectAttributes redirectAttributes,
                           Model model) {
         if(bindingResult.hasErrors()) {
-            PagedResult<ShortUrlDto> shortUrls = shortUrlService.findAllPublicShortUrls(1, properties.pageSize());
-            model.addAttribute("shortUrls", shortUrls);
-            model.addAttribute("baseUrl", properties.baseUrl());
+            this.addShortUrlsDataToModel(model, 1);
             return "index";
         }
 
@@ -68,6 +71,19 @@ public class HomeController {
         return "redirect:/";
     }
 
+    @GetMapping("/my-urls")
+    public String showUserUrls(
+            @RequestParam(defaultValue = "1") int page,
+            Model model) {
+        var currentUserId = securityUtils.getCurrentUserId();
+        PagedResult<ShortUrlDto> myUrls =
+                shortUrlService.getUserShortUrls(currentUserId, page, properties.pageSize());
+        model.addAttribute("shortUrls", myUrls);
+        model.addAttribute("baseUrl", properties.baseUrl());
+        model.addAttribute("paginationUrl", "/my-urls");
+        return "my-urls";
+    }
+
     @GetMapping("/s/{shortKey}")
     String redirectToOriginalUrl(@PathVariable String shortKey) {
         Long userId = securityUtils.getCurrentUserId();
@@ -82,5 +98,26 @@ public class HomeController {
     @GetMapping("/login")
     String loginForm() {
         return "login";
+    }
+
+    @PostMapping("/delete-urls")
+    public String deleteUrls(
+            @RequestParam(value = "ids", required = false) List<Long> ids,
+            RedirectAttributes redirectAttributes) {
+        if (ids == null || ids.isEmpty()) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage", "No URLs selected for deletion");
+            return "redirect:/my-urls";
+        }
+        try {
+            var currentUserId = securityUtils.getCurrentUserId();
+            shortUrlService.deleteUserShortUrls(ids, currentUserId);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Selected URLs have been deleted successfully");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Error deleting URLs: " + e.getMessage());
+        }
+        return "redirect:/my-urls";
     }
 }
