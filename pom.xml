@@ -11,11 +11,11 @@
 	<groupId>com.pedrocf01</groupId>
 	<artifactId>url-shortner</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>url-shortner</name>
-	<description>URL Shortner</description>
+	<name>url-shortener</name>
+	<description>URL Shortener</description>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -102,6 +102,12 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <image>
+                        <name>pedrocf01/${project.artifactId}</name>
+                    </image>
+                </configuration>
+
 			</plugin>
 		</plugins>
 	</build>
