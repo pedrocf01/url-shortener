@@ -1,6 +1,6 @@
 # Encurtador de URLs
 
-Fiz esse projeto para aplicar meus estudos de Java e Spring na prática, especialmente desenvolvimento Web, definição de regras de negócio e integração com banco de dados.
+Fiz esse projeto para aplicar meus estudos em Java e Spring na prática, especialmente desenvolvimento Web, definição de regras de negócio e integração com banco de dados.
 
 Esse é um aplicativo web para encurtamento de URLs, desenvolvido com Java e Spring Boot. Os usuários podem encurtar qualquer URL, definir datas de expiração, marcar links como privados e visualizar a contagem de cliques.
 
